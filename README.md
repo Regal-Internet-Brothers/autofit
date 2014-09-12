@@ -10,7 +10,8 @@ I may add my own display-in-display code (CameraDisplay), along with the rest of
 **Features:**
 * Complete compatibility with the original 'autofit' module.
 * Internal 'Strict' language compatibility.
-* Sub-displays: Sub displays can be used to have a "picture-in-picture" or "split-screen" effect in games.
+* Sub-displays: Sub-displays can be used to have a "picture-in-picture" or "split-screen" effect in games.
+* Support for matrix operations within Mojo. (Scaling and position related)
 * Easy integration of sub-displays and sub-displays for those displays. (Through simple property overloading)
 
 **References:**
