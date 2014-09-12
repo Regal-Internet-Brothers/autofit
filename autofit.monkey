@@ -5,6 +5,8 @@ Public
 #Rem
 	TODO:
 		* Optimize the border drawing routine.
+		* Add an image-option to the border drawing routine.
+		* Add some kind of support for 'OnResize' in Mojo.
 #End
 
 ' Imports:
@@ -633,7 +635,9 @@ Class VirtualDisplay
 			In the case of a normal virtual-display, this is the device's width and height.
 			
 			For something like picture-in-picture, you'd want these to be the desired area's dimensions.
-			Also note that with P-In-P/split-screen, disabling 'DrawBorders' when updating is usually ideal.
+			
+			Also note that with P-In-P/split-screen, disabling 'DrawBorders'
+			when "updating" (Calling 'UpdateVirtualDisplay') is usually ideal.
 	#End
 	
 	Method ScreenWidth:Int() Property
