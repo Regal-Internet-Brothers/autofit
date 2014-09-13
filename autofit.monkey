@@ -71,7 +71,7 @@ End
 		Return VirtualDisplay.Display.GetZoom()
 	End
 	
-	' This command updates the global-display. (This should be called in 'OnRender', before clearing the screen for the first time)
+	' This command updates the global-display. This should be called in 'OnRender', before clearing the screen for the first time. (Every render that is, not just the first overall use)
 	' For a full description of this command, view the 'VirtualDisplay' class's implementation's documentation.
 	Function UpdateVirtualDisplay:Void(ZoomBorders:Bool=VirtualDisplay.Default_ZoomBorders, KeepBorders:Bool=VirtualDisplay.Default_KeepBorders, DrawBorders:Bool=VirtualDisplay.Default_DrawBorders)
 		VirtualDisplay.Display.UpdateVirtualDisplay(ZoomBorders, KeepBorders, DrawBorders)
