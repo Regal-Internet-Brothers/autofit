@@ -148,7 +148,7 @@ Class VirtualDisplay
 	Const Default_KeepBorders:Bool = False
 	Const Default_DrawBorders:Bool = True
 	
-	Const Default_Limit:Bool = True ' False
+	Const Default_LimitInput:Bool = True ' False
 	
 	' Global variable(s):
 	Global Display:VirtualDisplay = Null
@@ -245,40 +245,40 @@ Class VirtualDisplay
 		End
 		
 		' For a full description of these methods, please read the globally defined functions' documentation:
-		Method VMouseX:Float(Limit:Bool=Default_Limit)
+		Method VMouseX:Float(Limit:Bool=Default_LimitInput)
 			Return MouseX(Limit)
 		End
 		
-		Method VMouseY:Float(Limit:Bool=Default_Limit)
+		Method VMouseY:Float(Limit:Bool=Default_LimitInput)
 			Return MouseY(Limit)
 		End
 		
-		Method MouseX:Float(Limit:Bool=Default_Limit)
+		Method MouseX:Float(Limit:Bool=Default_LimitInput)
 			Return ProcessVirtualPosition_X(input.MouseX(), Limit)
 		End
 		
-		Method MouseY:Float(Limit:Bool=Default_Limit)
+		Method MouseY:Float(Limit:Bool=Default_LimitInput)
 			Return ProcessVirtualPosition_Y(input.MouseY(), Limit)
 		End
 		
-		Method VTouchX:Float(Index:Int, Limit:Bool=Default_Limit)
+		Method VTouchX:Float(Index:Int, Limit:Bool=Default_LimitInput)
 			Return TouchX(Index, Limit)
 		End
 		
-		Method VTouchY:Float(Index:Int, Limit:Bool=Default_Limit)
+		Method VTouchY:Float(Index:Int, Limit:Bool=Default_LimitInput)
 			Return TouchY(Index, Limit)
 		End
 		
-		Method TouchX:Float(Index:Int, Limit:Bool=Default_Limit)
+		Method TouchX:Float(Index:Int, Limit:Bool=Default_LimitInput)
 			Return ProcessVirtualPosition_X(input.TouchX(Index), Limit)
 		End
 	
-		Method TouchY:Float(Index:Int, Limit:Bool=Default_Limit)
+		Method TouchY:Float(Index:Int, Limit:Bool=Default_LimitInput)
 			Return ProcessVirtualPosition_Y(input.TouchY(Index), Limit)
 		End
 		
 		' These two commands process input-coordinates, producing their virtual equivalents:
-		Method ProcessVirtualPosition_X:Float(InputX:Float, Limit:Bool=Default_Limit)
+		Method ProcessVirtualPosition_X:Float(InputX:Float, Limit:Bool=Default_LimitInput)
 			' Local variable(s):
 			Local SW:= Converted_ScreenWidth ' Float(ScreenWidth)
 			
@@ -304,7 +304,7 @@ Class VirtualDisplay
 			Return X
 		End
 		
-		Method ProcessVirtualPosition_Y:Float(InputY:Float, Limit:Bool=Default_Limit)
+		Method ProcessVirtualPosition_Y:Float(InputY:Float, Limit:Bool=Default_LimitInput)
 			' Local variable(s):
 			Local SH:= Converted_ScreenHeight ' Float(ScreenHeight)
 			
