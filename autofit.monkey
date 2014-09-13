@@ -740,16 +740,14 @@ Class SubDisplay Extends VirtualDisplay
 	Const Default_Zoom:Float = 1.0
 	
 	' Booleans / Flags:
-	Const Default_GlobalDisplay:Bool = False
-	
 	Const Default_KeepBorders:Bool = False
 	Const Default_ZoomBorders:Bool = False
 	Const Default_DrawBorders:Bool = False
 	
 	' Constructor(s):
-	Method New(Width:Int=AUTO, Height:Int=AUTO, Zoom:Float=Default_Zoom, GlobalDisplay:Bool=Default_GlobalDisplay)
+	Method New(Width:Int=AUTO, Height:Int=AUTO, Zoom:Float=Default_Zoom)
 		' Call the super-class's implementation.
-		Super.New(Width, Height, Zoom, GlobalDisplay)
+		Super.New(Width, Height, Zoom, False)
 		
 		' Nothing else so far.
 	End
@@ -767,7 +765,15 @@ Class SubDisplay Extends VirtualDisplay
 	End
 	
 	' Methods:
-	' Nothing so far.
+	#If Not FLAG_CONSOLEMODE
+		' This overload is only here for the sake of this class's defaults.
+		Method UpdateVirtualDisplay:Void(ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
+			' Call the super-class's implementation.
+			Super.UpdateVirtualDisplay(ZoomBorders, KeepBorders, DrawBorders)
+			
+			Return
+		End
+	#End
 	
 	' Properties:
 	Method ScreenWidth:Int() Property
@@ -797,6 +803,61 @@ Class SubDisplay Extends VirtualDisplay
 	Private
 	
 	' Nothing so far.
+	
+	Public
+End
+
+#Rem
+	DESCRIPTION:
+		* A 'CameraDisplay' is basically just a 'SubDisplay', but with manual 'ScreenWidth' and 'ScreenHeight' properties.
+		This class is best used for camera views, such as in situations where the intent is 'picture-in-picture', or 'split-screen'.
+		By itself this is by no means a camera code-base, but it should give you sub-displays at whatever size and position you desire.
+#End
+
+Class CameraDisplay Extends SubDisplay ' Final
+	' Constant variable(s):
+	' Nothing so far.
+	
+	' Constructor(s):
+	Method New(Width:Int, Height:Int, VirtualWidth:Int=AUTO, VirtualHeight:Int=AUTO, Zoom:Float=Default_Zoom)
+		' Call the super-class's implementation.
+		Super.New(VirtualWidth, VirtualHeight, Zoom)
+		
+		ScreenWidth = Width
+		ScreenHeight = Height
+	End
+	
+	' Methods:
+	' Nothing so far.
+	
+	' Properties:
+	Method ScreenWidth:Int() Property
+		Return Self._ScreenWidth
+	End
+	
+	Method ScreenHeight:Int() Property
+		Return Self._ScreenHeight
+	End
+	
+	Method ScreenWidth:Void(Input:Int) Property
+		Self._ScreenWidth = Input
+		
+		Return
+	End
+	
+	Method ScreenHeight:Void(Input:Int) Property
+		Self._ScreenHeight = Input
+		
+		Return
+	End
+	
+	' Fields (Public):
+	' Nothing so far.
+	
+	' Fields (Private):
+	Private
+	
+	Field _ScreenWidth:Int, _ScreenHeight:Int
 	
 	Public
 End
