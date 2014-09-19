@@ -8,11 +8,12 @@ The original module was developed by James "DruggedBunny" Boyd. Due to a lack of
 I may add my own display-in-display code (CameraDisplay), along with the rest of my camera-code to this at some point, but for now, this works.
 
 **Features:**
-* Complete compatibility with the original 'autofit' module.
-* Internal 'Strict' language compatibility.
+* Compatibility with the original 'autofit' module.
+* Internal 'Strict' language conformity.
 * Sub-displays: Sub-displays can be used to have a "picture-in-picture" or "split-screen" effect in games.
 * Support for matrix operations within Mojo. (Scaling and position related)
-* Easy integration of sub-displays and sub-displays for those displays. (Through simple property overloading)
+* Custom border colors, and border-draw toggling.
+* Easy integration of sub-displays and sub-displays for those displays. (Through simple property overloading; see 'CameraDisplay')
 
 **References:**
 * [The original forum thread for 'autofit'](http://www.monkey-x.com/Community/posts.php?topic=1500&page=1)
