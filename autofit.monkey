@@ -9,6 +9,9 @@ Public
 		* Add some kind of support for 'OnResize' in Mojo.
 #End
 
+' Preprocessor related:
+#AUTOFIT_IMPLEMENTED = True
+
 ' Imports:
 #If BRL_GAMETARGET_IMPLEMENTED
 	Import mojo.app
@@ -765,7 +768,7 @@ Class SubDisplay Extends VirtualDisplay
 	End
 	
 	' Methods:
-	#If Not FLAG_CONSOLEMODE
+	#If BRL_GAMETARGET_IMPLEMENTED
 		' This overload is only here for the sake of this class's defaults.
 		Method UpdateVirtualDisplay:Void(ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
 			' Call the super-class's implementation.
