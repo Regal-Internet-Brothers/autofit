@@ -1,7 +1,7 @@
 autofit
 =======
 
-A refactored version of the public domain 'autofit' module for the Monkey programming language.
+A refactored version of the public domain 'autofit' module for the [Monkey programming language](https://github.com/blitz-research/monkey).
 
 The original module was developed by James "DruggedBunny" Boyd. Due to a lack of a proper license, I can only assume the statements of "[Public domain code]" allows me the right to sublicense. That being said, this code-base contains very little of the original source, and is only identical name-wise for the sake of compatibility with existing applications.
 
