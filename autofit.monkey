@@ -6,11 +6,21 @@ Public
 	TODO:
 		* Optimize the border drawing routine.
 		* Add an image-option to the border drawing routine.
-		* Add some kind of support for 'OnResize' in Mojo.
 #End
 
 ' Preprocessor related:
 #AUTOFIT_IMPLEMENTED = True
+
+' Disable this if your application explicitly calls 'OnResize'/'OnVirtualResize'.
+' If unsure, leave this as it is.
+#AUTOFIT_AUTOCHECK_SCREENSIZE = True
+
+' Enabling this will cause every 'VirtualDisplay' object to hold
+' a private flag describing if it is the global display.
+
+' Disabling this will cause this to be backed by
+' a check against the 'Display' global variable.
+#AUTOFIT_CACHE_GLOBALDISPLAY_FLAG = True
 
 ' Imports:
 #If BRL_GAMETARGET_IMPLEMENTED
@@ -125,7 +135,17 @@ End
 	End
 #End
 
-' These commands do not check if a global-display is present, so use them at your own risk:
+' See the 'VirtualDisplay' class's 'OnResize'
+' documentation for more information about this command.
+Function OnVirtualResize:Void()
+	If (VirtualDisplay.Display <> Null) Then
+		VirtualDisplay.Display.OnResize()
+	Endif
+	
+	Return
+End
+
+' These commands do not check if the global-display is present, so use them at your own risk:
 
 ' This commands return the virtual width and height of the global display:
 Function VDeviceWidth:Float()
@@ -175,16 +195,25 @@ Class VirtualDisplay
 			' Set the virtual zoom.
 			VirtualZoom = Zoom
 			
-			' Force the zoom to auto-detect. Best hack ever. ('VirtualZoom' can be zero)
-			Last_VirtualZoom = VirtualZoom + 1.0
+			' Force auto-detection of the virtual-zoom. (Needed for initialization)
+			ZoomChanged = True
 			
 			' Store the virtual display-ratio.
 			'CalculateVirtualRatio()
 		#End
 		
+		#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
+			OnResize()
+		#End
+		
 		If (GlobalDisplay) Then
 			' Set this object as the primary/global display.
 			Display = Self
+			
+			#If AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
+				' Set the global-display flag to 'True'.
+				IsGlobalDisplay = True
+			#ENd
 		Endif
 		
 		Return
@@ -205,7 +234,10 @@ Class VirtualDisplay
 	End
 	
 	Method Free:Bool()
-		' Nothing so far.
+		#If AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
+			' Set the global-display flag to 'False'.
+			Self.IsGlobalDisplay = False
+		#End
 		
 		' Return the default response.
 		Return True
@@ -371,19 +403,27 @@ Class VirtualDisplay
 			' Set the 'last' flag for 'DrawBorders'.
 			Self.Last_DrawBorders = DrawBorders
 			
-			' Local variable(s):
-			Local ScreenWidth:= Self.ScreenWidth
-			Local ScreenHeight:= Self.ScreenHeight
+			#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
+				If (Not IsGlobalDisplay) Then
+			#End
+					' Check if we aren't already changing the screen size:
+					If (Not SizeChanged) Then
+						Local ScreenWidth:= Self.ScreenWidth
+						Local ScreenHeight:= Self.ScreenHeight
+						
+						' Check if the "device's" screen resolution has changed:
+						If ((ScreenWidth <> Last_ScreenWidth) Or (ScreenHeight <> Last_ScreenHeight)) Then
+							Last_ScreenWidth = ScreenWidth
+							Last_ScreenHeight = ScreenHeight
+							
+							SizeChanged = True
+						Endif
+					Endif
+			#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
+				Endif
+			#End
 			
-			' Check if the "device's" screen resolution has changed:
-			If ((ScreenWidth <> Last_ScreenWidth) Or (ScreenHeight <> Last_ScreenHeight)) Then
-				Last_ScreenWidth = ScreenWidth
-				Last_ScreenHeight = ScreenHeight
-				
-				SizeChanged = True
-			Endif
-			
-			' Check if the size changed:
+			' Now that the previous operations of occurred, check if we have a new screen-size:
 			If (SizeChanged) Then
 				' Store the "device" resolution in floats to avoid unneeded casts down the road:
 				Converted_ScreenWidth = Float(ScreenWidth)
@@ -415,15 +455,8 @@ Class VirtualDisplay
 					BorderHeight = 0.0
 				Endif
 			Endif
-	
-			' Check if the virtual zoom has changed:
-			If (VirtualZoom <> Last_VirtualZoom) Then
-				Last_VirtualZoom = VirtualZoom
-				
-				ZoomChanged = True
-			Endif
 			
-			' Recalculate the zoom if the virtual zoom has changed, or the size has changed:
+			' Recalculate the display area if the virtual zoom or screen-size has changed:
 			If (ZoomChanged Or SizeChanged) Then
 				If (ZoomBorders) Then
 					' Calculate the width and height of the scaled virtual resolution:
@@ -511,16 +544,6 @@ Class VirtualDisplay
 				SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
 				
 				Cls(BorderColor_R, BorderColor_G, BorderColor_B)
-				
-				#Rem
-				Local SD_Temp:= GetScissor()
-			
-				For Local I:= 0 Until SD_Temp.Length()
-					Print("["+I+"]: " + SD_Temp[I])
-				Next
-				
-				DebugStop()
-				#End
 			Endif
 			
 			' Set the scissor to the inner area.
@@ -539,7 +562,18 @@ Class VirtualDisplay
 		End
 	#End
 	
-	' Properties:
+	' Call this when your application's device-resolution
+	' has changed (When your 'OnResize' method is called).
+	' This will force screen-size recalculation.
+	Method OnResize:Void()
+		#If BRL_GAMETARGET_IMPLEMENTED
+			Self.SizeChanged = True
+		#End
+		
+		Return
+	End
+	
+	' Properties (Public):
 	#If BRL_GAMETARGET_IMPLEMENTED
 		#Rem
 			DESCRIPTION:
@@ -589,6 +623,20 @@ Class VirtualDisplay
 		
 		Method ScissorY:Void(Input:Float) Property
 			Scissor[SCISSOR_LOCATION_Y] = Input
+			
+			Return
+		End
+		
+		Method VirtualZoom:Float() Property
+			Return Self._VirtualZoom
+		End
+		
+		Method VirtualZoom:Void(Value:Float) Property
+			If (Value <> Self._VirtualZoom) Then
+				ZoomChanged = True
+			Endif
+			
+			Self._VirtualZoom = Value
 			
 			Return
 		End
@@ -664,6 +712,19 @@ Class VirtualDisplay
 		Return
 	End
 	
+	' Properties (Private):
+	Private
+	
+	' To ensure you can't assign this to anything outside of this module,
+	' assuming this flag is not cached, we will not have a property for assignment:
+	#If Not AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
+		Method IsGlobalDisplay:Bool() Property
+			Return (Display = Self)
+		End
+	#End
+	
+	Public
+	
 	' Fields (Public):	
 	#If BRL_GAMETARGET_IMPLEMENTED
 		' The colors used when drawing the border.
@@ -675,9 +736,6 @@ Class VirtualDisplay
 		' The last known "literal" screen dimensions:
 		Field Last_ScreenWidth:Int
 		Field Last_ScreenHeight:Int
-		
-		' The last known virtual zoom.
-		Field Last_VirtualZoom:Float
 		
 		Field VirtualRatio:Float
 		Field ScreenRatio:Float
@@ -706,16 +764,11 @@ Class VirtualDisplay
 		' The main multiplier for the scale of this display.
 		Field Scalar:Float
 		
-		' The virtual zoom of this display.
-		Field VirtualZoom:Float
-		
 		' Pre-casted floating-point versions of 'ScreenWidth' and 'ScreenHeight' (Via UpdateVirtualDisplay):
 		Field Converted_ScreenWidth:Float
 		Field Converted_ScreenHeight:Float
 		
 		' Booleans / Flags:
-		Field SizeChanged:Bool
-		Field ZoomChanged:Bool
 		
 		' The last known border-draw flag.
 		Field Last_DrawBorders:Bool
@@ -731,6 +784,20 @@ Class VirtualDisplay
 	' The virtual display size:
 	Field _VirtualWidth:Float
 	Field _VirtualHeight:Float
+	
+	#If BRL_GAMETARGET_IMPLEMENTED
+		' The last known virtual zoom.
+		Field _VirtualZoom:Float
+	#End
+	
+	' Booleans / Flags:
+	Field SizeChanged:Bool
+	Field ZoomChanged:Bool
+	
+	#If AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
+		' This field should not be set outside of this module.
+		Field IsGlobalDisplay:Bool
+	#End
 	
 	Public
 End
@@ -778,7 +845,7 @@ Class SubDisplay Extends VirtualDisplay
 		End
 	#End
 	
-	' Properties:
+	' Properties (Public):
 	Method ScreenWidth:Int() Property
 		Return VDeviceWidth()
 	End
@@ -798,6 +865,17 @@ Class SubDisplay Extends VirtualDisplay
 		
 		Return
 	End
+	
+	' Properties (Private):
+	Private
+	
+	#If Not AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
+		Method IsGlobalDisplay:Bool() Property
+			Return False
+		End
+	#End
+	
+	Public
 	
 	' Fields (Public):
 	' Nothing so far.
