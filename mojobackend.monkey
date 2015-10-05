@@ -8,36 +8,18 @@ Public
 		* Add an image-option to the border drawing routine.
 #End
 
-' Preprocessor related:
-#AUTOFIT_IMPLEMENTED = True
+' Friends:
+Friend autofit.shared
 
-' Disable this if your application explicitly calls 'OnResize'/'OnVirtualResize'.
-' If unsure, leave this as it is.
-#AUTOFIT_AUTOCHECK_SCREENSIZE = True
+' Imports (Public):
+Import mojo.app
 
-' Enabling this will cause every 'VirtualDisplay' object to hold
-' a private flag describing if it is the global display.
+' Imports (Private):
+Private
 
-' Disabling this will cause this to be backed by
-' a check against the 'Display' global variable.
-#AUTOFIT_CACHE_GLOBALDISPLAY_FLAG = True
+Import basedisplay
 
-' This enables experimental support for Mojo 2.
-'#AUTOFIT_MOJO2 = True
-
-' Imports:
-#If Not AUTOFIT_MOJO2
-	#If BRL_GAMETARGET_IMPLEMENTED
-		Import mojo
-	#Else
-		Import mojoemulator
-	#End
-	
-	' Aliases:
-	Alias Graphics = mojo.graphics
-#Else
-	Import mojo2
-#End
+Public
 
 ' Constant variable(s) (Public):
 ' Nothing so far.
@@ -64,215 +46,80 @@ Const MATRIX_LOCATION_TY:Int			= 5
 
 Public
 
-' Classes:
-Class VirtualDisplay
-	' Constant variable(s):
-	Const AUTO:Int = -1
+' Functions:
+#If AUTOFIT_LEGACY_API
+	' This command updates the global-display. This should be called in 'OnRender', before clearing the screen for the first time. (Every render that is, not just the first overall use)
+	' For a full description of this command, view the 'VirtualDisplay' class's implementation's documentation.
+	#Rem
+	Function UpdateVirtualDisplay:Void(ZoomBorders:Bool=VirtualDisplay.Default_ZoomBorders, KeepBorders:Bool=VirtualDisplay.Default_KeepBorders, DrawBorders:Bool=VirtualDisplay.Default_DrawBorders)
+		VirtualDisplay.Display.UpdateVirtualDisplay(ZoomBorders, KeepBorders, DrawBorders)
 	
+		Return
+	End
+	#End
+#End
+
+' Classes:
+Class VirtualDisplay Extends BaseDisplay
 	' Defaults:
-	Const Default_Zoom:Float = 1.0
 	
 	' Booleans / Flags:
-	Const Default_GlobalDisplay:Bool = False
+	#If AUTOFIT_LEGACY_API
+		Const Default_GlobalDisplay:Bool = False
+	#End
 	
-	Const Default_ZoomBorders:Bool = True
-	Const Default_KeepBorders:Bool = False
-	Const Default_DrawBorders:Bool = True
+	' Global variable(s) (Private):
+	Private
 	
-	Const Default_LimitInput:Bool = True ' False
+	#If AUTOFIT_LEGACY_API
+		Global Display:VirtualDisplay = Null
+	#End
 	
-	' Global variable(s):
-	Global Display:VirtualDisplay = Null
+	Public
+	
+	' Functions:
+	#If AUTOFIT_LEGACY_API
+		Function SetGlobalDisplay:Void(D:VirtualDisplay)
+			Display = D
+			
+			Return
+		End
+		
+		Function GetGlobalDisplay:VirtualDisplay()
+			Return Display
+		End
+	#End
 	
 	' Constructor(s):
-	Method New(Width:Int=AUTO, Height:Int=AUTO, Zoom:Float=Default_Zoom, GlobalDisplay:Bool=Default_GlobalDisplay)
-		' Call the main construction routine.
-		Construct(Width, Height, Zoom, GlobalDisplay)
-	End
-	
-	Method Construct:Void(Width:Int=AUTO, Height:Int=AUTO, Zoom:Float=Default_Zoom, GlobalDisplay:Bool=Default_GlobalDisplay)
-		If (Width <> AUTO And Height <> AUTO) Then
-			Self.VirtualWidth = Width
-			Self.VirtualHeight = Height
-		Else
-			' Apply the default resolution.
-			ApplyDefaultResolution()
-		Endif
-		
-		#If BRL_GAMETARGET_IMPLEMENTED
-			' Set the virtual zoom.
-			VirtualZoom = Zoom
+	#If AUTOFIT_LEGACY_API
+		Method New(Width:Int=AUTO, Height:Int=AUTO, Zoom:Float=Default_Zoom, GlobalDisplay:Bool=Default_GlobalDisplay)
+			Super.New(Width, Height, Zoom)
 			
-			' Force auto-detection of the virtual-zoom. (Needed for initialization)
-			ZoomChanged = True
-			
-			' Store the virtual display-ratio.
-			'CalculateVirtualRatio()
-		#End
+			If (GlobalDisplay) Then
+				SetGlobalDisplay(Self)
+			Endif
+		End
+	#Else
+		Method New(Width:Int, Height:Int, Zoom:Float=Default_Zoom)
+			Super.New(Width, Height, Zoom)
+		End
 		
-		#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
-			OnResize()
-		#End
-		
-		If (GlobalDisplay) Then
-			' Set this object as the primary/global display.
-			Display = Self
-			
-			#If AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
-				' Set the global-display flag to 'True'.
-				IsGlobalDisplay = True
-			#ENd
-		Endif
-		
-		Return
-	End
-	
-	Method ApplyDefaultResolution:Void()
-		Self.VirtualWidth = DeviceWidth()
-		Self.VirtualHeight = DeviceHeight()
-		
-		Return
-	End
+		Method New(Zoom:Float=Default_Zoom)
+			Super.New(Zoom)
+		End
+	#End
 	
 	' Destructor(s):
-	
-	' This is just a quick wrapper for 'Free':
-	Method Discard:Bool()
-		Return Free()
-	End
-	
-	Method Free:Bool()
-		#If AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
-			' Set the global-display flag to 'False'.
-			Self.IsGlobalDisplay = False
-		#End
-		
-		' Return the default response.
-		Return True
-	End
+	#Rem
+		Method Free:Void()
+			Super.Free()
+			
+			Return
+		End
+	#End
 	
 	' Methods:
 	#If BRL_GAMETARGET_IMPLEMENTED
-		Method CalculateVirtualRatio:Void()
-			VirtualRatio = Max(VirtualHeight, 1.0) / Max(VirtualWidth, 1.0)
-			
-			Return
-		End
-		
-		Method GetZoom:Float()
-			Return VirtualZoom
-		End
-		
-		Method SetZoom:Void(Zoom:Float)
-			' Check for errors:
-			If (Zoom < 0.0) Then
-				Zoom = 0.0
-			Endif
-			
-			' Set the virtual zoom to the specified value.
-			VirtualZoom = Zoom
-			
-			Return
-		End
-		
-		Method AdjustZoom:Void(Amount:Float)
-			' Add the amount specified to the 'virtual-zoom'.
-			VirtualZoom += Amount
-			
-			' Make sure we don't have an inverted zoom-value:
-			If (VirtualZoom < 0.0) Then
-				VirtualZoom = 0.0
-			Endif
-			
-			Return
-		End
-		
-		' For a full description of these methods, please read the globally defined functions' documentation:
-		Method VMouseX:Float(Limit:Bool=Default_LimitInput)
-			Return MouseX(Limit)
-		End
-		
-		Method VMouseY:Float(Limit:Bool=Default_LimitInput)
-			Return MouseY(Limit)
-		End
-		
-		Method MouseX:Float(Limit:Bool=Default_LimitInput)
-			Return ProcessVirtualPosition_X(input.MouseX(), Limit)
-		End
-		
-		Method MouseY:Float(Limit:Bool=Default_LimitInput)
-			Return ProcessVirtualPosition_Y(input.MouseY(), Limit)
-		End
-		
-		Method VTouchX:Float(Index:Int, Limit:Bool=Default_LimitInput)
-			Return TouchX(Index, Limit)
-		End
-		
-		Method VTouchY:Float(Index:Int, Limit:Bool=Default_LimitInput)
-			Return TouchY(Index, Limit)
-		End
-		
-		Method TouchX:Float(Index:Int, Limit:Bool=Default_LimitInput)
-			Return ProcessVirtualPosition_X(input.TouchX(Index), Limit)
-		End
-	
-		Method TouchY:Float(Index:Int, Limit:Bool=Default_LimitInput)
-			Return ProcessVirtualPosition_Y(input.TouchY(Index), Limit)
-		End
-		
-		' These two commands process input-coordinates, producing their virtual equivalents:
-		Method ProcessVirtualPosition_X:Float(InputX:Float, Limit:Bool=Default_LimitInput)
-			' Local variable(s):
-			Local SW:= Converted_ScreenWidth ' Float(ScreenWidth)
-			
-			' Grab the position of the mouse from the center of the screen.
-			Local Offset:Float = (InputX - SW / 2.0)
-			
-			' Calculate the virtual position of the mouse.
-			Local X:Float = ((Offset / Scalar) / VirtualZoom + (VirtualWidth / 2.0))
-			
-			' Limit the the calculated position if requested:
-			If (Limit) Then
-				Local WidthLimit:Float = ((VirtualWidth - 1.0)) + BorderWidth
-				
-				If (X > 0.0) Then
-					If (X > WidthLimit) Then
-						Return WidthLimit
-					Endif
-				Elseif (Not Last_DrawBorders) Then
-					Return 0.0
-				Endif
-			Endif
-			
-			Return X
-		End
-		
-		Method ProcessVirtualPosition_Y:Float(InputY:Float, Limit:Bool=Default_LimitInput)
-			' Local variable(s):
-			Local SH:= Converted_ScreenHeight ' Float(ScreenHeight)
-			
-			' Grab the position of the mouse from the center of the screen.
-			Local Offset:Float = (InputY - SH / 2.0)
-			
-			' Calculate the virtual position of the mouse.
-			Local Y:Float = ((Offset / Scalar) / VirtualZoom + (VirtualHeight / 2.0))
-			
-			' Limit the the calculated position if requested:
-			If (Limit) Then
-				Local HeightLimit:Float = ((VirtualHeight - 1.0)) + BorderHeight
-				
-				If (Y > 0.0) Then
-					If (Y > HeightLimit) Then
-						Return HeightLimit
-					Endif
-				Elseif (Not Last_DrawBorders) Then
-					Return 0.0
-				Endif
-			Endif
-			
-			Return Y
-		End
-		
 		#Rem
 			DESCRIPTION:
 				* The following is the main update-routine for virtual displays.
@@ -478,17 +325,6 @@ Class VirtualDisplay
 			End
 	#End
 	
-	' Call this when your application's device-resolution
-	' has changed (When your 'OnResize' method is called).
-	' This will force screen-size recalculation.
-	Method OnResize:Void()
-		#If BRL_GAMETARGET_IMPLEMENTED
-			Self.SizeChanged = True
-		#End
-		
-		Return
-	End
-	
 	' Properties (Public):
 	#If BRL_GAMETARGET_IMPLEMENTED
 		#Rem
@@ -542,110 +378,24 @@ Class VirtualDisplay
 			
 			Return
 		End
-		
-		Method VirtualZoom:Float() Property
-			Return Self._VirtualZoom
-		End
-		
-		Method VirtualZoom:Void(Value:Float) Property
-			If (Value <> Self._VirtualZoom) Then
-				ZoomChanged = True
-			Endif
-			
-			Self._VirtualZoom = Value
-			
-			Return
-		End
 	#End
 	
-	#Rem
-		DESCRIPTION:
-			* These two properties represent the "virtual", or "conceptual" dimensions of the display area.
-			
-			Basically, this will be the resolution you use for your game;
-			whatever resolution you're designing your game with, you should set it with these.
-			
-			The values of these properties are user-defined, and can be changed at any time.
-	#End
+	' Properties (Protected):
+	Protected
 	
-	Method VirtualWidth:Float() Property
-		Return Self._VirtualWidth
-	End
-	
-	Method VirtualHeight:Float() Property
-		Return Self._VirtualHeight
-	End
-	
-	Method VirtualWidth:Void(Input:Float) Property
-		Self._VirtualWidth = Input
-		
-		#If BRL_GAMETARGET_IMPLEMENTED
-			CalculateVirtualRatio()
-		#End
-		
-		Return
-	End
-	
-	Method VirtualHeight:Void(Input:Float) Property
-		Self._VirtualHeight = Input
-		
-		#If BRL_GAMETARGET_IMPLEMENTED
-			CalculateVirtualRatio()
-		#End
-		
-		Return
-	End
-	
-	#Rem
-		DESCRIPTION:
-			* These two properties represent the "hardware" dimensions of the display area.
-			In the case of a normal virtual-display, this is the device's width and height.
-			
-			For something like picture-in-picture, you'd want these to be the desired area's dimensions.
-			
-			Also note that with P-In-P/split-screen, disabling 'DrawBorders'
-			when "updating" (Calling 'UpdateVirtualDisplay') is usually ideal.
-	#End
-	
-	Method ScreenWidth:Int() Property
-		Return DeviceWidth()
-	End
-	
-	Method ScreenHeight:Int() Property
-		Return DeviceHeight()
-	End
-	
-	' Reserved / Other:
-	Method ScreenWidth:Void(Input:Int) Property
-		' Nothing so far.
-		
-		Return
-	End
-	
-	Method ScreenHeight:Void(Input:Int) Property
-		' Nothing so far.
-		
-		Return
-	End
-	
-	' Properties (Private):
-	Private
-	
-	' To ensure you can't assign this to anything outside of this module,
-	' assuming this flag is not cached, we will not have a property for assignment:
-	#If Not AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
-		Method IsGlobalDisplay:Bool() Property
+	' This is for internal use only.
+	Method IsGlobalDisplay:Bool() Property
+		#If AUTOFIT_LEGACY_API
 			Return (Display = Self)
-		End
-	#End
+		#Else
+			Return False
+		#End
+	End
 	
 	Public
 	
 	' Fields (Public):	
 	#If BRL_GAMETARGET_IMPLEMENTED
-		' The colors used when drawing the border.
-		Field BorderColor_R:Float, BorderColor_G:Float, BorderColor_B:Float
-		
 		Field X:Float
 		Field Y:Float
 		
@@ -653,15 +403,10 @@ Class VirtualDisplay
 		Field Last_ScreenWidth:Int
 		Field Last_ScreenHeight:Int
 		
-		Field VirtualRatio:Float
 		Field ScreenRatio:Float
 		
 		Field ScaledScreenWidth:Float
 		Field ScaledScreenHeight:Float
-		
-		' The dimensions of the border:
-		Field BorderWidth:Float
-		Field BorderHeight:Float
 		
 		' The generated scissor-area.
 		Field Scissor:Float[SCISSOR_ARRAY_SIZE]
@@ -676,44 +421,9 @@ Class VirtualDisplay
 		' The offsets by which the view needs to be shifted:
 		Field ViewOffsetX:Float
 		Field ViewOffsetY:Float
-		
-		' The main multiplier for the scale of this display.
-		Field Scalar:Float
-		
-		' Pre-casted floating-point versions of 'ScreenWidth' and 'ScreenHeight' (Via UpdateVirtualDisplay):
-		Field Converted_ScreenWidth:Float
-		Field Converted_ScreenHeight:Float
-		
-		' Booleans / Flags:
-		
-		' The last known border-draw flag.
-		Field Last_DrawBorders:Bool
 	#End
 	
 	' The 'real' / scaled width and height of the virtual display:
 	Field RealWidth:Float
 	Field RealHeight:Float
-	
-	' Fields (Private):
-	Private
-	
-	' The virtual display size:
-	Field _VirtualWidth:Float
-	Field _VirtualHeight:Float
-	
-	#If BRL_GAMETARGET_IMPLEMENTED
-		' The last known virtual zoom.
-		Field _VirtualZoom:Float
-	#End
-	
-	' Booleans / Flags:
-	Field SizeChanged:Bool
-	Field ZoomChanged:Bool
-	
-	#If AUTOFIT_CACHE_GLOBALDISPLAY_FLAG
-		' This field should not be set outside of this module.
-		Field IsGlobalDisplay:Bool
-	#End
-	
-	Public
 End
