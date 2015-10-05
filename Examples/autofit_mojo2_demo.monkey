@@ -10,6 +10,7 @@ Public
 
 ' Preprocessor related:
 #AUTOFIT_MOJO2 = True
+#AUTOFIT_LEGACY_API = True
 
 ' Imports:
 Import autofit
@@ -47,6 +48,9 @@ Class Application Extends App Final
 	End
 	
 	Method OnRender:Int()
+		Const Size:Float = 64.0
+		Const HSize:Float = (Size / 2.0)
+		
 		' Currently required.
 		Graphics.PushMatrix()
 		
@@ -55,14 +59,17 @@ Class Application Extends App Final
 		
 		' Clear the canvas.
 		Graphics.Clear(0.5, 0.5, 0.5)
-
+		
+		Graphics.Translate(-HSize, -HSize)
+		
 		' Draw a rectangle in the middle of the virtual display:
 		Graphics.SetColor(0.0, 0.0, 0.0)
-		Graphics.DrawRect(VDeviceWidth() * 0.5, VDeviceHeight() * 0.5, 64.0, 64.0)
+		
+		Graphics.DrawRect(VDeviceWidth() * 0.5, VDeviceHeight() * 0.5, Size, Size)
 
 		' Draw a rectangle at the virtual mouse position:
 		Graphics.SetColor(1.0, 1.0, 1.0)
-		Graphics.DrawRect(VMouseX(), VMouseY(), 64.0, 64.0)
+		Graphics.DrawRect(VMouseX(), VMouseY(), Size, Size)
 		
 		' Currently required.
 		Graphics.PopMatrix()
