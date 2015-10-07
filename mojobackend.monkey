@@ -18,50 +18,15 @@ Friend autofit.shared
 Private
 
 Import basedisplay
+Import mojodisplay
 
 Import mojo.app
 Import mojo.graphics
 
 Public
 
-' Constant variable(s) (Public):
-' Nothing so far.
-
-' Constant variable(s) (Private):
-Private
-
-' Array-size constants:
-Const SCISSOR_ARRAY_SIZE:Int			= 4
-Const MATRIX_ARRAY_SIZE:Int				= 6
-
-' Scissor element positions:
-Const SCISSOR_LOCATION_X:Int			= 0
-Const SCISSOR_LOCATION_Y:Int			= 1
-Const SCISSOR_LOCATION_WIDTH:Int		= 2
-Const SCISSOR_LOCATION_HEIGHT:Int		= 3
-
-Const MATRIX_LOCATION_IX:Int			= 0
-Const MATRIX_LOCATION_IY:Int			= 1
-Const MATRIX_LOCATION_JX:Int			= 2
-Const MATRIX_LOCATION_JY:Int			= 3
-Const MATRIX_LOCATION_TX:Int			= 4
-Const MATRIX_LOCATION_TY:Int			= 5
-
-Public
-
-' Functions:
-#If AUTOFIT_LEGACY_API
-	' This command updates the global-display. This should be called in 'OnRender', before clearing the screen for the first time. (Every render that is, not just the first overall use)
-	' For a full description of this command, view the 'VirtualDisplay' class's implementation's documentation.
-	Function UpdateVirtualDisplay:Void(ZoomBorders:Bool=VirtualDisplay.Default_ZoomBorders, KeepBorders:Bool=VirtualDisplay.Default_KeepBorders, DrawBorders:Bool=VirtualDisplay.Default_DrawBorders)
-		VirtualDisplay.Display.UpdateVirtualDisplay(ZoomBorders, KeepBorders, DrawBorders)
-	
-		Return
-	End
-#End
-
 ' Classes:
-Class VirtualDisplay Extends BaseDisplay
+Class VirtualDisplay Extends MojoDisplay<Float>
 	' Defaults:
 	
 	' Booleans / Flags:
@@ -324,60 +289,6 @@ Class VirtualDisplay Extends BaseDisplay
 			
 			Return
 		End
-	
-	' Properties (Public):
-	#If BRL_GAMETARGET_IMPLEMENTED
-		#Rem
-			DESCRIPTION:
-				* These properties are wrappers for the internal scissor data.
-				
-				The internal scissor data is calculated every time 'UpdateVirtualDisplay' is called.
-				The scissor represents the "real" position and size of the current display. (Not counting borders)
-				
-				This information may be useful to some users, and along with usability, this is why these properties exist.
-				
-				These properties are only available when some form of 'BBGame' is implemented.
-		#End
-		
-		Method ScissorW:Float() Property
-			Return Scissor[SCISSOR_LOCATION_WIDTH]
-		End
-		
-		Method ScissorH:Float() Property
-			Return Scissor[SCISSOR_LOCATION_HEIGHT]
-		End
-		
-		Method ScissorX:Float() Property
-			Return Scissor[SCISSOR_LOCATION_X]
-		End
-		
-		Method ScissorY:Float() Property
-			Return Scissor[SCISSOR_LOCATION_Y]
-		End
-		
-		Method ScissorW:Void(Input:Float) Property
-			Scissor[SCISSOR_LOCATION_WIDTH] = Input
-			
-			Return
-		End
-		
-		Method ScissorH:Void(Input:Float) Property
-			Scissor[SCISSOR_LOCATION_HEIGHT] = Input
-			
-			Return
-		End
-		
-		Method ScissorX:Void(Input:Float) Property
-			Scissor[SCISSOR_LOCATION_X] = Input
-			
-			Return
-		End
-		
-		Method ScissorY:Void(Input:Float) Property
-			Scissor[SCISSOR_LOCATION_Y] = Input
-			
-			Return
-		End
 	#End
 	
 	' Properties (Protected):
@@ -393,37 +304,15 @@ Class VirtualDisplay Extends BaseDisplay
 	End
 	
 	Public
-	
-	' Fields (Public):	
-	#If BRL_GAMETARGET_IMPLEMENTED
-		Field X:Float
-		Field Y:Float
-		
-		' The last known "literal" screen dimensions:
-		Field Last_ScreenWidth:Int
-		Field Last_ScreenHeight:Int
-		
-		Field ScreenRatio:Float
-		
-		Field ScaledScreenWidth:Float
-		Field ScaledScreenHeight:Float
-		
-		' The generated scissor-area.
-		Field Scissor:Float[SCISSOR_ARRAY_SIZE]
-		
-		' A cache used for matrix manipulation.
-		Field MatrixCache:Float[MATRIX_ARRAY_SIZE]
-		
-		' The pixels between the real borders and the virtual boders
-		Field Border_OffsetX:Float
-		Field Border_OffsetY:Float
-		
-		' The offsets by which the view needs to be shifted:
-		Field ViewOffsetX:Float
-		Field ViewOffsetY:Float
-	#End
-	
-	' The 'real' / scaled width and height of the virtual display:
-	Field RealWidth:Float
-	Field RealHeight:Float
 End
+
+' Functions:
+#If AUTOFIT_LEGACY_API
+	' This command updates the global-display. This should be called in 'OnRender', before clearing the screen for the first time. (Every render that is, not just the first overall use)
+	' For a full description of this command, view the 'VirtualDisplay' class's implementation's documentation.
+	Function UpdateVirtualDisplay:Void(ZoomBorders:Bool=VirtualDisplay.Default_ZoomBorders, KeepBorders:Bool=VirtualDisplay.Default_KeepBorders, DrawBorders:Bool=VirtualDisplay.Default_DrawBorders)
+		VirtualDisplay.Display.UpdateVirtualDisplay(ZoomBorders, KeepBorders, DrawBorders)
+	
+		Return
+	End
+#End

@@ -21,9 +21,6 @@ Public
 #Rem
 	If enabled, and 'AUTOFIT_MOJO2' is enabled,
 	this will use 'SetViewport' instead of 'SetScissor'.
-	
-	This requires usage of 'PushMatrix' and 'PopMatrix'
-	around calls to 'Refresh' / 'UpdateVirtualDisplay'.
 #End
 
 '#AUTOFIT_MOJO2_USE_VIEWPORT = True

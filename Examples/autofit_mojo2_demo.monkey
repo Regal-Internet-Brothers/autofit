@@ -8,7 +8,7 @@ Public
 
 ' Preprocessor related:
 #AUTOFIT_MOJO2 = True
-#AUTOFIT_MOJO2_USE_VIEWPORT = False ' True
+#AUTOFIT_MOJO2_USE_VIEWPORT = True ' False
 
 #AUTOFIT_LEGACY_API = False
 
@@ -67,11 +67,8 @@ Class Application Extends App Final
 		Graphics.SetViewport(0, 0, DeviceWidth(), DeviceHeight())
 		Graphics.SetProjection2d(0, DeviceWidth(), 0, DeviceHeight())
 		
-		' If we're using Mojo 2, and 'AUTOFIT_MOJO2_USE_VIEWPORT' is enabled,
-		' we do not need to manage the current matrix.
-		#If Not AUTOFIT_MOJO2_USE_VIEWPORT
-			Graphics.PushMatrix()
-		#End
+		' Store the current matrix, so we can apply any needed transformations.
+		Graphics.PushMatrix()
 		
 		' Update the virtual display.
 		Display.Refresh(Graphics)
@@ -98,9 +95,8 @@ Class Application Extends App Final
 		' Flush the canvas.
 		Graphics.Flush()
 		
-		#If Not AUTOFIT_MOJO2_USE_VIEWPORT
-			Graphics.PopMatrix()
-		#End
+		' Restore the matrix to what it was. (Post-transform)
+		Graphics.PopMatrix()
 		
 		' Return the default response.
 		Return 0

@@ -350,6 +350,7 @@ Class BaseDisplay Abstract
 		' The colors used when drawing the border.
 		Field BorderColor_R:Float, BorderColor_G:Float, BorderColor_B:Float
 		
+		' The virtual resolution's "aspect ratio".
 		Field VirtualRatio:Float
 		
 		' The dimensions of the border:
@@ -358,11 +359,6 @@ Class BaseDisplay Abstract
 		
 		' The main multiplier for the scale of this display.
 		Field Scalar:Float
-		
-		' Pre-casted floating-point versions of 'ScreenWidth'
-		' and 'ScreenHeight' (Please provide these values):
-		Field Converted_ScreenWidth:Float
-		Field Converted_ScreenHeight:Float
 		
 		' Booleans / Flags:
 		Field SizeChanged:Bool
@@ -382,6 +378,11 @@ Class BaseDisplay Abstract
 	#If BRL_GAMETARGET_IMPLEMENTED
 		' The last known virtual zoom.
 		Field _VirtualZoom:Float
+		
+		' Pre-casted floating-point versions of 'ScreenWidth'
+		' and 'ScreenHeight' (Please provide these values):
+		Field Converted_ScreenWidth:Float
+		Field Converted_ScreenHeight:Float
 	#End
 	
 	Public
