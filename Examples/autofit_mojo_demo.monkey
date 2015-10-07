@@ -15,6 +15,8 @@ Public
 #GLFW_WINDOW_HEIGHT = 480
 #GLFW_WINDOW_RESIZABLE = True
 
+#GLFW_WINDOW_RENDER_WHILE_RESIZING = True
+
 ' Imports:
 Import autofit
 Import mojo

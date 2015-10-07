@@ -121,6 +121,14 @@ Class VirtualDisplay Extends BaseDisplay
 	
 	' Methods:
 	#If BRL_GAMETARGET_IMPLEMENTED
+		#If AUTOFIT_LEGACY_API
+			Method UpdateVirtualDisplay:Void(ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
+				Refresh(ZoomBorders, KeepBorders, DrawBorders)
+				
+				Return
+			End
+		#End
+		
 		#Rem
 			DESCRIPTION:
 				* The following is the main update-routine for virtual displays.
@@ -152,7 +160,7 @@ Class VirtualDisplay Extends BaseDisplay
 				Unless you're dealing with sub-displays, or you really want to manage that yourself, keep this enabled.
 		#End
 		
-		Method UpdateVirtualDisplay:Void(ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
+		Method Refresh:Void(ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
 			' Check for errors:
 			' Nothing so far.
 			

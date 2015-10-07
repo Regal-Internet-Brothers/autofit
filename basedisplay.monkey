@@ -158,22 +158,6 @@ Class BaseDisplay Abstract
 		End
 		
 		' For a full description of these methods, please read the globally defined functions' documentation:
-		Method VMouseX:Float(Limit:Bool=Default_LimitInput)
-			Return MouseX(Limit)
-		End
-		
-		Method VMouseY:Float(Limit:Bool=Default_LimitInput)
-			Return MouseY(Limit)
-		End
-		
-		Method MouseX:Float(Limit:Bool=Default_LimitInput)
-			Return ProcessVirtualPosition_X(input.MouseX(), Limit)
-		End
-		
-		Method MouseY:Float(Limit:Bool=Default_LimitInput)
-			Return ProcessVirtualPosition_Y(input.MouseY(), Limit)
-		End
-		
 		Method VTouchX:Float(Index:Int, Limit:Bool=Default_LimitInput)
 			Return TouchX(Index, Limit)
 		End
@@ -269,6 +253,22 @@ Class BaseDisplay Abstract
 			Return
 		End
 	#End
+	
+	Method VMouseX:Float(Limit:Bool=Default_LimitInput) Property
+		Return MouseX(Limit)
+	End
+	
+	Method VMouseY:Float(Limit:Bool=Default_LimitInput) Property
+		Return MouseY(Limit)
+	End
+	
+	Method MouseX:Float(Limit:Bool=Default_LimitInput) Property
+		Return ProcessVirtualPosition_X(input.MouseX(), Limit)
+	End
+	
+	Method MouseY:Float(Limit:Bool=Default_LimitInput) Property
+		Return ProcessVirtualPosition_Y(input.MouseY(), Limit)
+	End
 	
 	#Rem
 		DESCRIPTION:

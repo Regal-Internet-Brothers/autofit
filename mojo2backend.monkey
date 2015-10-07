@@ -2,6 +2,9 @@ Strict
 
 Public
 
+' Preprocessor related:
+#AUTOFIT_MOJO2_USE_VIEWPORT = True ' False
+
 ' Friends:
 Friend autofit.shared
 
@@ -146,7 +149,15 @@ Class VirtualDisplay Extends BaseDisplay
 				Unless you're dealing with sub-displays, or you really want to manage that yourself, keep this enabled.
 		#End
 		
-		Method UpdateVirtualDisplay:Void(Graphics:Canvas, ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
+		#If AUTOFIT_LEGACY_API
+			Method UpdateVirtualDisplay:Void(Graphics:Canvas, ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
+				Refresh(Graphics, ZoomBorders, KeepBorders, DrawBorders)
+				
+				Return
+			End
+		#End
+		
+		Method Refresh:Void(Graphics:Canvas, ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
 			' Check for errors:
 			' Nothing so far.
 			
@@ -290,26 +301,36 @@ Class VirtualDisplay Extends BaseDisplay
 			SX = ((X*MScaleX)+MX)
 			SY = ((Y*MScaleY)+MY)
 			
-			'Graphics.SetProjection2d(0, VirtualWidth, 0, VirtualHeight)
+			#If AUTOFIT_MOJO2_USE_VIEWPORT
+				Graphics.SetProjection2d(0, VirtualWidth, 0, VirtualHeight)
+			#End
 			
 			If (DrawBorders) Then
-				' Draw the border for the entire "device":
-				Graphics.SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
+				#If AUTOFIT_MOJO2_USE_VIEWPORT
+					' Draw the border for the entire "device":
+					Graphics.SetViewport(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
+				#Else
+					Graphics.SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
+				#End
 				
 				Graphics.Clear(BorderColor_R, BorderColor_G, BorderColor_B)
 			Endif
 			
-			' Set the scissor to the inner area.
-			Graphics.SetScissor((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
-			
-			' Scale everything.
-			Graphics.Scale(Scalar * VirtualZoom, Scalar * VirtualZoom)
-	
-			' Shift the display to account for the borders.
-			If (VirtualZoom > 0.0) Then
-				Graphics.Translate(ViewOffsetX, ViewOffsetY)
-			Endif
-			'#End
+			' Set the scissor to the inner area:
+			#If AUTOFIT_MOJO2_USE_VIEWPORT
+				Graphics.SetViewport((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
+			#Else
+				' Set the scissor to the inner area.
+				Graphics.SetScissor((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
+				
+				' Scale everything.
+				Graphics.Scale(Scalar * VirtualZoom, Scalar * VirtualZoom)
+		
+				' Shift the display to account for the borders.
+				If (VirtualZoom > 0.0) Then
+					Graphics.Translate(ViewOffsetX, ViewOffsetY)
+				Endif
+			#End
 			
 			Return
 		End
@@ -320,7 +341,7 @@ Class VirtualDisplay Extends BaseDisplay
 			DESCRIPTION:
 				* These properties are wrappers for the internal scissor data.
 				
-				The internal scissor data is calculated every time 'UpdateVirtualDisplay' is called.
+				The internal scissor data is calculated every time 'Refresh' is called.
 				The scissor represents the "real" position and size of the current display. (Not counting borders)
 				
 				This information may be useful to some users, and along with usability, this is why these properties exist.
