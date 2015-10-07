@@ -234,20 +234,20 @@ Class VirtualDisplay Extends MojoDisplay<Int>
 					' Apply limits to the scissor:
 					ScissorX = Max(0, Int(BorderWidth))
 					ScissorY = Max(0, Int(BorderHeight))
-					ScissorW = Min(Int(Converted_ScreenWidth - BorderWidth * 2.0), ScreenWidth)
-					ScissorH = Min(Int(Converted_ScreenHeight - BorderHeight * 2.0), ScreenHeight)
+					ScissorW = Min(Int(Converted_ScreenWidth - (BorderWidth * 2.0)), ScreenWidth)
+					ScissorH = Min(Int(Converted_ScreenHeight - (BorderHeight * 2.0)), ScreenHeight)
 				Endif
 				
 				' Calculate the dimensions of the scaled virtual display (In pixels):
 				ScaledScreenWidth = (VirtualWidth * Scalar * VirtualZoom)
 				ScaledScreenHeight = (VirtualHeight * Scalar * VirtualZoom)
-	
+				
 				' Find the view offsets:
 				#If Not AUTOFIT_MOJO2_USE_VIEWPORT
 					ViewOffsetX = (((Converted_ScreenWidth - ScaledScreenWidth) / 2.0) / Scalar) / VirtualZoom
 					ViewOffsetY = (((Converted_ScreenHeight - ScaledScreenHeight) / 2.0) / Scalar) / VirtualZoom
 				#End
-			
+				
 				' Reset the 'change-flags':
 				SizeChanged = False
 				ZoomChanged = False
@@ -274,13 +274,14 @@ Class VirtualDisplay Extends MojoDisplay<Int>
 			SY = ((Y*MScaleY)+MY)
 			
 			#If AUTOFIT_MOJO2_USE_VIEWPORT
-				Graphics.SetProjection2d(0, VirtualWidth, 0, VirtualHeight)
+				Graphics.SetProjection2d(ViewOffsetX, VirtualWidth, ViewOffsetY, VirtualHeight)
 			#End
 			
 			If (DrawBorders) Then
 				#If AUTOFIT_MOJO2_USE_VIEWPORT
 					' Draw the border for the entire "device":
-					Graphics.SetViewport(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
+					'Graphics.SetViewport(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
+					Graphics.SetViewport(SX, SY, ScreenWidth, ScreenHeight)
 				#Else
 					Graphics.SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
 				#End
@@ -290,9 +291,10 @@ Class VirtualDisplay Extends MojoDisplay<Int>
 			
 			' Set the scissor to the inner area:
 			#If AUTOFIT_MOJO2_USE_VIEWPORT
-				Graphics.SetViewport(ScissorX+SX, ScissorY+SY, ScissorW, ScissorH)
-				'Graphics.SetViewport((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
+				'Graphics.SetViewport(ScissorX+X, ScissorY+Y, ScissorW, ScissorH)
+				Graphics.SetViewport((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
 				
+				'Graphics.Translate(ViewOffsetX, ViewOffsetY)
 				'Graphics.Scale(VirtualZoom, VirtualZoom)
 			#Else
 				' Set the scissor to the inner area.
