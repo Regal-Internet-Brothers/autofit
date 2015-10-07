@@ -73,11 +73,17 @@ Class BaseDisplay Abstract
 	#End
 	
 	Method ApplyDefaultResolution:Void()
-		Self._VirtualWidth = DeviceWidth()
-		Self._VirtualHeight = DeviceHeight()
+		SetVirtualSize(DeviceWidth(), DeviceHeight())
+		
+		Return
+	End
+
+	Method SetVirtualSize:Void(Width:Float, Height:Float)
+		Self._VirtualWidth = Width
+		Self._VirtualHeight = Height
 		
 		CalculateVirtualRatio()
-		
+
 		Return
 	End
 	
@@ -359,6 +365,8 @@ Class BaseDisplay Abstract
 		Field Converted_ScreenHeight:Float
 		
 		' Booleans / Flags:
+		Field SizeChanged:Bool
+		Field ZoomChanged:Bool
 		
 		' The last known border-draw flag.
 		Field Last_DrawBorders:Bool
@@ -366,10 +374,6 @@ Class BaseDisplay Abstract
 	
 	' Fields (Protected):
 	Protected
-	
-	' Booleans / Flags:
-	Field SizeChanged:Bool
-	Field ZoomChanged:Bool
 	
 	' The virtual display size:
 	Field _VirtualWidth:Float

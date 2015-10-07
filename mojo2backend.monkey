@@ -146,179 +146,173 @@ Class VirtualDisplay Extends BaseDisplay
 				Unless you're dealing with sub-displays, or you really want to manage that yourself, keep this enabled.
 		#End
 		
-		#If Not AUTOFIT_MOJO2
-			Method UpdateVirtualDisplay:Void(ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
-		#Else
-			Method UpdateVirtualDisplay:Void(Graphics:Canvas, ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
-		#End
-				' Check for errors:
-				' Nothing so far.
-				
-				' Set the 'last' flag for 'DrawBorders'.
-				Self.Last_DrawBorders = DrawBorders
-				
-				#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
-					If (Not IsGlobalDisplay) Then
-				#End
-						' Check if we aren't already changing the screen size:
-						If (Not SizeChanged) Then
-							Local ScreenWidth:= Self.ScreenWidth
-							Local ScreenHeight:= Self.ScreenHeight
-							
-							' Check if the "device's" screen resolution has changed:
-							If ((ScreenWidth <> Last_ScreenWidth) Or (ScreenHeight <> Last_ScreenHeight)) Then
-								Last_ScreenWidth = ScreenWidth
-								Last_ScreenHeight = ScreenHeight
-								
-								SizeChanged = True
-							Endif
-						Endif
-				#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
-					Endif
-				#End
-				
-				' Now that the previous operations of occurred, check if we have a new screen-size:
-				If (SizeChanged) Then
-					' Store the "device" resolution in floats to avoid unneeded casts down the road:
-					Converted_ScreenWidth = Float(ScreenWidth)
-					Converted_ScreenHeight = Float(ScreenHeight)
-					
-					' Recalculate the device's screen-ratio.
-					ScreenRatio = Converted_ScreenHeight / Converted_ScreenWidth
-		
-					' Compare the newly calculated ratio against the pre-calculated virtual ratio:
-					If (ScreenRatio > VirtualRatio) Then
-						' The "device's" aspect ratio is narrower than (Or the same as) the calculated aspect ratio.
-						' We need to have a horizontal border of zero, and calcuate a new vertical border.
-						
-						' Calculate the scalar needed to generate the border.
-						Scalar = Converted_ScreenWidth / VirtualWidth
-						
-						' Calculate the desired borders:
-						BorderWidth = 0.0
-						BorderHeight = (Converted_ScreenHeight - VirtualHeight * Scalar) / 2.0
-					Else
-						' The "device's" aspect ratio is width than (Or the same as) the calculated aspect ratio.
-						' We need to have a vertical border of zero, and calcuate a new horizontal border.
-						
-						' Calculate the scalar needed to generate the border.
-						Scalar = Converted_ScreenHeight / VirtualHeight
-						
-						' Calculate the desired borders:
-						BorderWidth = (Converted_ScreenWidth - VirtualWidth * Scalar) / 2.0
-						BorderHeight = 0.0
-					Endif
-				Endif
-				
-				' Recalculate the display area if the virtual zoom or screen-size has changed:
-				If (ZoomChanged Or SizeChanged) Then
-					If (ZoomBorders) Then
-						' Calculate the width and height of the scaled virtual resolution:
-						RealWidth = VirtualWidth * VirtualZoom * Scalar
-						RealHeight = VirtualHeight * VirtualZoom * Scalar
-				
-						' Calculate the amount of space (in pixels) between the "real device" borders and the virtual borders:
-						Border_OffsetX = (Converted_ScreenWidth - RealWidth) * 0.5
-						Border_OffsetY = (Converted_ScreenHeight - RealHeight) * 0.5
-						
-						' In the event we keep borders, do the following:
-						If (KeepBorders) Then
-							' Calculate the inner area:
-							If (Border_OffsetX < BorderWidth) Then
-								ScissorX = BorderWidth
-								ScissorW = Converted_ScreenWidth - BorderWidth * 2.0
-							Else
-								ScissorX = Border_OffsetX
-								ScissorW = Converted_ScreenWidth - (Border_OffsetX * 2.0)
-							Endif
+		Method UpdateVirtualDisplay:Void(Graphics:Canvas, ZoomBorders:Bool=Default_ZoomBorders, KeepBorders:Bool=Default_KeepBorders, DrawBorders:Bool=Default_DrawBorders)
+			' Check for errors:
+			' Nothing so far.
 			
-							If (Border_OffsetY < BorderHeight) Then
-								ScissorY = BorderHeight
-								ScissorH = Converted_ScreenHeight - BorderHeight * 2.0
-							Else
-								ScissorY = Border_OffsetY
-								ScissorH = Converted_ScreenHeight - (Border_OffsetY * 2.0)
-							Endif
+			' Set the 'last' flag for 'DrawBorders'.
+			Self.Last_DrawBorders = DrawBorders
+			
+			' This check is performed so we can optionally support call-back based screen-size updates:
+			#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
+				If (Not IsGlobalDisplay) Then
+			#End
+					' Check if we aren't already changing the screen size:
+					If (Not SizeChanged) Then
+						Local ScreenWidth:= Self.ScreenWidth
+						Local ScreenHeight:= Self.ScreenHeight
+						
+						' Check if the "device's" screen resolution has changed:
+						If ((ScreenWidth <> Last_ScreenWidth) Or (ScreenHeight <> Last_ScreenHeight)) Then
+							Last_ScreenWidth = ScreenWidth
+							Last_ScreenHeight = ScreenHeight
+							
+							SizeChanged = True
+						Endif
+					Endif
+			#If Not AUTOFIT_AUTOCHECK_SCREENSIZE
+				Endif
+			#End
+			
+			' Now that the previous operations of occurred, check if we have a new screen-size:
+			If (SizeChanged) Then
+				' Store the "device" resolution in floats to avoid unneeded casts down the road:
+				Converted_ScreenWidth = Float(ScreenWidth)
+				Converted_ScreenHeight = Float(ScreenHeight)
+				
+				' Recalculate the device's screen-ratio.
+				ScreenRatio = Converted_ScreenHeight / Converted_ScreenWidth
+	
+				' Compare the newly calculated ratio against the pre-calculated virtual ratio:
+				If (ScreenRatio > VirtualRatio) Then
+					' The "device's" aspect ratio is narrower than (Or the same as) the calculated aspect ratio.
+					' We need to have a horizontal border of zero, and calcuate a new vertical border.
+					
+					' Calculate the scalar needed to generate the border.
+					Scalar = Converted_ScreenWidth / VirtualWidth
+					
+					' Calculate the desired borders:
+					BorderWidth = 0.0
+					BorderHeight = (Converted_ScreenHeight - VirtualHeight * Scalar) / 2.0
+				Else
+					' The "device's" aspect ratio is width than (Or the same as) the calculated aspect ratio.
+					' We need to have a vertical border of zero, and calcuate a new horizontal border.
+					
+					' Calculate the scalar needed to generate the border.
+					Scalar = Converted_ScreenHeight / VirtualHeight
+					
+					' Calculate the desired borders:
+					BorderWidth = (Converted_ScreenWidth - VirtualWidth * Scalar) / 2.0
+					BorderHeight = 0.0
+				Endif
+			Endif
+			
+			' Recalculate the display area if the virtual zoom or screen-size has changed:
+			If (ZoomChanged Or SizeChanged) Then
+				If (ZoomBorders) Then
+					' Calculate the width and height of the scaled virtual resolution:
+					RealWidth = VirtualWidth * VirtualZoom * Scalar
+					RealHeight = VirtualHeight * VirtualZoom * Scalar
+			
+					' Calculate the amount of space (in pixels) between the "real device" borders and the virtual borders:
+					Border_OffsetX = (Converted_ScreenWidth - RealWidth) * 0.5
+					Border_OffsetY = (Converted_ScreenHeight - RealHeight) * 0.5
+					
+					' In the event we keep borders, do the following:
+					If (KeepBorders) Then
+						' Calculate the inner area:
+						If (Border_OffsetX < BorderWidth) Then
+							ScissorX = BorderWidth
+							ScissorW = Converted_ScreenWidth - BorderWidth * 2.0
 						Else
 							ScissorX = Border_OffsetX
 							ScissorW = Converted_ScreenWidth - (Border_OffsetX * 2.0)
-							
+						Endif
+		
+						If (Border_OffsetY < BorderHeight) Then
+							ScissorY = BorderHeight
+							ScissorH = Converted_ScreenHeight - BorderHeight * 2.0
+						Else
 							ScissorY = Border_OffsetY
 							ScissorH = Converted_ScreenHeight - (Border_OffsetY * 2.0)
 						Endif
-						
-						' Apply limits to the scissor:
-						ScissorX = Max (0.0, ScissorX)
-						ScissorY = Max (0.0, ScissorY)
-						ScissorW = Min (ScissorW, Converted_ScreenWidth)
-						ScissorH = Min (ScissorH, Converted_ScreenHeight)
 					Else
-						' Apply limits to the scissor:
-						ScissorX = Max (0.0, BorderWidth)
-						ScissorY = Max (0.0, BorderHeight)
-						ScissorW = Min (Converted_ScreenWidth - BorderWidth * 2.0, Converted_ScreenWidth)
-						ScissorH = Min (Converted_ScreenHeight - BorderHeight * 2.0, Converted_ScreenHeight)
+						ScissorX = Border_OffsetX
+						ScissorW = Converted_ScreenWidth - (Border_OffsetX * 2.0)
+						
+						ScissorY = Border_OffsetY
+						ScissorH = Converted_ScreenHeight - (Border_OffsetY * 2.0)
 					Endif
 					
-					' Calculate the dimensions of the scaled virtual display (In pixels):
-					ScaledScreenWidth = (VirtualWidth * Scalar * VirtualZoom)
-					ScaledScreenHeight = (VirtualHeight * Scalar * VirtualZoom)
-		
-					' Find the view offsets:
-					ViewOffsetX = (((Converted_ScreenWidth - ScaledScreenWidth) / 2.0) / Scalar) / VirtualZoom
-					ViewOffsetY = (((Converted_ScreenHeight - ScaledScreenHeight) / 2.0) / Scalar) / VirtualZoom
-				
-					' Reset the 'change-flags':
-					SizeChanged = False
-					ZoomChanged = False
+					' Apply limits to the scissor:
+					ScissorX = Max(0, ScissorX)
+					ScissorY = Max(0, ScissorY)
+					ScissorW = Min(ScissorW, ScreenWidth)
+					ScissorH = Min(ScissorH, ScreenHeight)
+				Else
+					' Apply limits to the scissor:
+					ScissorX = Max(0, Int(BorderWidth))
+					ScissorY = Max(0, Int(BorderHeight))
+					ScissorW = Min(Int(Converted_ScreenWidth - BorderWidth * 2.0), ScreenWidth)
+					ScissorH = Min(Int(Converted_ScreenHeight - BorderHeight * 2.0), ScreenHeight)
 				Endif
 				
-				'#If BRL_GAMETARGET_IMPLEMENTED
-				Local M:= MatrixCache
+				' Calculate the dimensions of the scaled virtual display (In pixels):
+				ScaledScreenWidth = (VirtualWidth * Scalar * VirtualZoom)
+				ScaledScreenHeight = (VirtualHeight * Scalar * VirtualZoom)
+	
+				' Find the view offsets:
+				ViewOffsetX = (((Converted_ScreenWidth - ScaledScreenWidth) / 2.0) / Scalar) / VirtualZoom
+				ViewOffsetY = (((Converted_ScreenHeight - ScaledScreenHeight) / 2.0) / Scalar) / VirtualZoom
+			
+				' Reset the 'change-flags':
+				SizeChanged = False
+				ZoomChanged = False
+			Endif
+			
+			'#If BRL_GAMETARGET_IMPLEMENTED
+			Local M:= MatrixCache
+			
+			Local MScaleX:Float, MScaleY:Float
+			Local MX:Float, MY:Float
+			
+			' Get the current matrix-data.
+			Graphics.GetMatrix(M)
+			
+			MX = M[MATRIX_LOCATION_TX]
+			MY = M[MATRIX_LOCATION_TY]
+			
+			MScaleX = Sqrt((M[MATRIX_LOCATION_IX]*M[MATRIX_LOCATION_IX]) + (M[MATRIX_LOCATION_JX]*M[MATRIX_LOCATION_JX]))
+			MScaleY = Sqrt((M[MATRIX_LOCATION_IY]*M[MATRIX_LOCATION_IY]) + (M[MATRIX_LOCATION_JY]*M[MATRIX_LOCATION_JY]))
+			
+			Local SX:Float, SY:Float
+			
+			SX = ((X*MScaleX)+MX)
+			SY = ((Y*MScaleY)+MY)
+			
+			'Graphics.SetProjection2d(0, VirtualWidth, 0, VirtualHeight)
+			
+			If (DrawBorders) Then
+				' Draw the border for the entire "device":
+				Graphics.SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
 				
-				Local MScaleX:Float, MScaleY:Float
-				Local MX:Float, MY:Float
-				
-				' Get the current matrix-data.
-				Graphics.GetMatrix(M)
-				
-				MX = M[MATRIX_LOCATION_TX]
-				MY = M[MATRIX_LOCATION_TY]
-				
-				MScaleX = Sqrt((M[MATRIX_LOCATION_IX]*M[MATRIX_LOCATION_IX]) + (M[MATRIX_LOCATION_JX]*M[MATRIX_LOCATION_JX]))
-				MScaleY = Sqrt((M[MATRIX_LOCATION_IY]*M[MATRIX_LOCATION_IY]) + (M[MATRIX_LOCATION_JY]*M[MATRIX_LOCATION_JY]))
-				
-				Local SX:Float, SY:Float
-				
-				SX = ((X*MScaleX)+MX)
-				SY = ((Y*MScaleY)+MY)
-				
-				If (DrawBorders) Then
-					' Draw the border for the entire "device":
-					Graphics.SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
-					
-					#If Not AUTOFIT_MOJO2
-						Graphics.Cls(BorderColor_R, BorderColor_G, BorderColor_B)
-					#Else
-						Graphics.Clear(BorderColor_R, BorderColor_G, BorderColor_B)
-					#End
-				Endif
-				
-				' Set the scissor to the inner area.
-				Graphics.SetScissor((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
-				
-				' Scale everything.
-				Graphics.Scale(Scalar * VirtualZoom, Scalar * VirtualZoom)
-		
-				' Shift the display to account for the borders.
-				If (VirtualZoom > 0.0) Then
-					Graphics.Translate(ViewOffsetX, ViewOffsetY)
-				Endif
-				'#End
-				
-				Return
-			End
-	#End
+				Graphics.Clear(BorderColor_R, BorderColor_G, BorderColor_B)
+			Endif
+			
+			' Set the scissor to the inner area.
+			Graphics.SetScissor((ScissorX*MScaleX)+SX, (ScissorY*MScaleY)+SY, ScissorW*MScaleX, ScissorH*MScaleY)
+			
+			' Scale everything.
+			Graphics.Scale(Scalar * VirtualZoom, Scalar * VirtualZoom)
+	
+			' Shift the display to account for the borders.
+			If (VirtualZoom > 0.0) Then
+				Graphics.Translate(ViewOffsetX, ViewOffsetY)
+			Endif
+			'#End
+			
+			Return
+		End
 	
 	' Properties (Public):
 	#If BRL_GAMETARGET_IMPLEMENTED
@@ -334,41 +328,41 @@ Class VirtualDisplay Extends BaseDisplay
 				These properties are only available when some form of 'BBGame' is implemented.
 		#End
 		
-		Method ScissorW:Float() Property
+		Method ScissorW:Int() Property
 			Return Scissor[SCISSOR_LOCATION_WIDTH]
 		End
 		
-		Method ScissorH:Float() Property
+		Method ScissorH:Int() Property
 			Return Scissor[SCISSOR_LOCATION_HEIGHT]
 		End
 		
-		Method ScissorX:Float() Property
+		Method ScissorX:Int() Property
 			Return Scissor[SCISSOR_LOCATION_X]
 		End
 		
-		Method ScissorY:Float() Property
+		Method ScissorY:Int() Property
 			Return Scissor[SCISSOR_LOCATION_Y]
 		End
 		
-		Method ScissorW:Void(Input:Float) Property
+		Method ScissorW:Void(Input:Int) Property
 			Scissor[SCISSOR_LOCATION_WIDTH] = Input
 			
 			Return
 		End
 		
-		Method ScissorH:Void(Input:Float) Property
+		Method ScissorH:Void(Input:Int) Property
 			Scissor[SCISSOR_LOCATION_HEIGHT] = Input
 			
 			Return
 		End
 		
-		Method ScissorX:Void(Input:Float) Property
+		Method ScissorX:Void(Input:Int) Property
 			Scissor[SCISSOR_LOCATION_X] = Input
 			
 			Return
 		End
 		
-		Method ScissorY:Void(Input:Float) Property
+		Method ScissorY:Void(Input:Int) Property
 			Scissor[SCISSOR_LOCATION_Y] = Input
 			
 			Return
@@ -394,17 +388,10 @@ Class VirtualDisplay Extends BaseDisplay
 		Field X:Float
 		Field Y:Float
 		
-		' The last known "literal" screen dimensions:
-		Field Last_ScreenWidth:Int
-		Field Last_ScreenHeight:Int
-		
 		Field ScreenRatio:Float
 		
 		Field ScaledScreenWidth:Float
 		Field ScaledScreenHeight:Float
-		
-		' The generated scissor-area.
-		Field Scissor:Float[SCISSOR_ARRAY_SIZE]
 		
 		' A cache used for matrix manipulation.
 		Field MatrixCache:Float[MATRIX_ARRAY_SIZE]
@@ -416,6 +403,15 @@ Class VirtualDisplay Extends BaseDisplay
 		' The offsets by which the view needs to be shifted:
 		Field ViewOffsetX:Float
 		Field ViewOffsetY:Float
+		
+		#If AUTOFIT_AUTOCHECK_SCREENSIZE
+			' The last known "literal" screen dimensions:
+			Field Last_ScreenWidth:Int
+			Field Last_ScreenHeight:Int
+		#End
+		
+		' The viewport's area using the parent display's space. (Viewport coordinates)
+		Field Scissor:Int[SCISSOR_ARRAY_SIZE]
 	#End
 	
 	' The 'real' / scaled width and height of the virtual display:

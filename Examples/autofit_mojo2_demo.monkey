@@ -12,6 +12,11 @@ Public
 #AUTOFIT_MOJO2 = True
 #AUTOFIT_LEGACY_API = True
 
+#GLFW_WINDOW_TITLE = "Autofit Mojo 2 Demo"
+#GLFW_WINDOW_WIDTH = 640
+#GLFW_WINDOW_HEIGHT = 480
+#GLFW_WINDOW_RESIZABLE = True
+
 ' Imports:
 Import autofit
 
@@ -51,14 +56,17 @@ Class Application Extends App Final
 		Const Size:Float = 64.0
 		Const HSize:Float = (Size / 2.0)
 		
+		Graphics.SetViewport(0, 0, DeviceWidth(), DeviceHeight())
+		Graphics.SetProjection2d(0, DeviceWidth(), 0, DeviceHeight())
+
+		' Clear the canvas.
+		Graphics.Clear(0.5, 0.5, 0.5)
+		
 		' Currently required.
 		Graphics.PushMatrix()
 		
 		' Update the virtual display.
 		UpdateVirtualDisplay(Graphics)
-		
-		' Clear the canvas.
-		Graphics.Clear(0.5, 0.5, 0.5)
 		
 		Graphics.Translate(-HSize, -HSize)
 		
@@ -69,6 +77,7 @@ Class Application Extends App Final
 
 		' Draw a rectangle at the virtual mouse position:
 		Graphics.SetColor(1.0, 1.0, 1.0)
+		
 		Graphics.DrawRect(VMouseX(), VMouseY(), Size, Size)
 		
 		' Currently required.

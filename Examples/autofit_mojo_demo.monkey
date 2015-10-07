@@ -10,6 +10,11 @@ Public
 #AUTOFIT_MOJO2 = False
 #AUTOFIT_LEGACY_API = True
 
+#GLFW_WINDOW_TITLE = "Autofit Mojo Demo"
+#GLFW_WINDOW_WIDTH = 640
+#GLFW_WINDOW_HEIGHT = 480
+#GLFW_WINDOW_RESIZABLE = True
+
 ' Imports:
 Import autofit
 Import mojo
