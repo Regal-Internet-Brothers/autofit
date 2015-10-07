@@ -327,9 +327,6 @@ Class BaseDisplay Abstract
 		Return DeviceHeight()
 	End
 	
-	' Properties (Protected):
-	Protected
-	
 	' Reserved / Other:
 	Method ScreenWidth:Void(Input:Int) Property
 		' Nothing so far.
@@ -342,8 +339,6 @@ Class BaseDisplay Abstract
 		
 		Return
 	End
-	
-	Public
 	
 	' Fields (Public):	
 	#If BRL_GAMETARGET_IMPLEMENTED
