@@ -8,7 +8,7 @@ Public
 
 ' Preprocessor related:
 #AUTOFIT_MOJO2 = True
-#AUTOFIT_MOJO2_USE_VIEWPORT = True
+#AUTOFIT_MOJO2_USE_VIEWPORT = False ' True
 
 #AUTOFIT_LEGACY_API = False
 
@@ -64,8 +64,8 @@ Class Application Extends App Final
 		Const Size:Float = 64.0
 		Const HSize:Float = (Size / 2.0)
 		
-		'Graphics.SetViewport(0, 0, DeviceWidth(), DeviceHeight())
-		'Graphics.SetProjection2d(0, DeviceWidth(), 0, DeviceHeight())
+		Graphics.SetViewport(0, 0, DeviceWidth(), DeviceHeight())
+		Graphics.SetProjection2d(0, DeviceWidth(), 0, DeviceHeight())
 		
 		' If we're using Mojo 2, and 'AUTOFIT_MOJO2_USE_VIEWPORT' is enabled,
 		' we do not need to manage the current matrix.
@@ -77,7 +77,7 @@ Class Application Extends App Final
 		Display.Refresh(Graphics)
 		
 		' Clear the canvas.
-		Graphics.Clear(0.5, 0.5, 0.5)
+		Graphics.Clear(1.0, 0.0, 0.0)
 		
 		Graphics.PushMatrix()
 		

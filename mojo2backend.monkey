@@ -425,11 +425,13 @@ Class VirtualDisplay Extends BaseDisplay
 		Field ViewOffsetX:Float
 		Field ViewOffsetY:Float
 		
-		#If AUTOFIT_AUTOCHECK_SCREENSIZE
-			' The last known "literal" screen dimensions:
-			Field Last_ScreenWidth:Int
-			Field Last_ScreenHeight:Int
-		#End
+		'#If AUTOFIT_AUTOCHECK_SCREENSIZE
+		
+		' The last known "literal" screen dimensions:
+		Field Last_ScreenWidth:Int
+		Field Last_ScreenHeight:Int
+		
+		'#End
 		
 		' The viewport's area using the parent display's space. (Viewport coordinates)
 		Field Scissor:Int[SCISSOR_ARRAY_SIZE]
