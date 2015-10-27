@@ -3,9 +3,9 @@ Strict
 Public
 
 ' Friends:
-Friend autofit.shared
-Friend autofit.mojobackend
-Friend autofit.mojo2backend
+Friend regal.autofit.shared
+Friend regal.autofit.mojobackend
+Friend regal.autofit.mojo2backend
 
 ' Imports (Public):
 Import shared

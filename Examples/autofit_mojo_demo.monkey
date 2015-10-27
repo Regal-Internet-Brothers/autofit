@@ -18,7 +18,8 @@ Public
 #GLFW_WINDOW_RENDER_WHILE_RESIZING = True
 
 ' Imports:
-Import autofit
+Import regal.autofit
+
 Import mojo
 
 ' Classes:

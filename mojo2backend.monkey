@@ -11,7 +11,7 @@ Public
 #AUTOFIT_MOJO2_USE_VIEWPORT = True ' False
 
 ' Friends:
-Friend autofit.shared
+Friend regal.autofit.shared
 
 ' Imports (Public):
 ' Nothing so far.
@@ -274,14 +274,15 @@ Class VirtualDisplay Extends MojoDisplay<Int>
 			SY = ((Y*MScaleY)+MY)
 			
 			#If AUTOFIT_MOJO2_USE_VIEWPORT
+				'Graphics.SetProjection2d(ViewOffsetX, VirtualWidth, ViewOffsetY, VirtualHeight)
 				Graphics.SetProjection2d(ViewOffsetX, VirtualWidth, ViewOffsetY, VirtualHeight)
 			#End
 			
 			If (DrawBorders) Then
 				#If AUTOFIT_MOJO2_USE_VIEWPORT
 					' Draw the border for the entire "device":
-					'Graphics.SetViewport(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
-					Graphics.SetViewport(SX, SY, ScreenWidth, ScreenHeight)
+					Graphics.SetViewport(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
+					'Graphics.SetViewport(SX, SY, ScreenWidth, ScreenHeight)
 				#Else
 					Graphics.SetScissor(SX, SY, ScreenWidth*MScaleX, ScreenHeight*MScaleY)
 				#End

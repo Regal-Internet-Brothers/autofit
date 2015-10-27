@@ -8,7 +8,7 @@ Public
 
 ' Preprocessor related:
 #AUTOFIT_MOJO2 = True
-#AUTOFIT_MOJO2_USE_VIEWPORT = True ' False
+#AUTOFIT_MOJO2_USE_VIEWPORT = False ' True
 
 #AUTOFIT_LEGACY_API = False
 
@@ -20,7 +20,7 @@ Public
 #GLFW_WINDOW_RENDER_WHILE_RESIZING = True
 
 ' Imports:
-Import autofit
+Import regal.autofit
 
 Import mojo2
 

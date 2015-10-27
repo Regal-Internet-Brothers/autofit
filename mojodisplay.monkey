@@ -3,8 +3,8 @@ Strict
 Public
 
 ' Friends:
-Friend autofit.mojo2backend
-Friend autofit.mojobackend
+Friend regal.autofit.mojo2backend
+Friend regal.autofit.mojobackend
 
 ' Imports (Public):
 Import shared

@@ -9,7 +9,7 @@ Public
 #End
 
 ' Friends:
-Friend autofit.shared
+Friend regal.autofit.shared
 
 ' Imports (Public):
 ' Nothing so far.
