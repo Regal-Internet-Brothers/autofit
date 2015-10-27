@@ -17,7 +17,7 @@ Private
 	Import mojo.app
 	Import mojo.input
 #Else
-	Import mojoemulator.app
+	Import regal.mojoemulator.app
 #End
 
 Public
